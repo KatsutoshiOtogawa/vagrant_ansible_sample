@@ -1,0 +1,16 @@
+---
+- hosts: test_server
+  tasks:
+  - name: create directory
+    file:
+      path: /home/ansible/tmp
+      state: directory
+      owner: ansible
+      mode: 0750
+
+  - name: copy file
+    copy:
+      src: /etc/hosts
+      dest: /home/ansible/tmp/
+      owner: ansible
+      mode: 0640
