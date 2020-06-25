@@ -78,8 +78,8 @@ Vagrant.configure("2") do |config|
 
     # vagrant以外で行うときは必ず秘密鍵にパスコードを入れる。でないと
     # 秘密鍵を入れているUSB,PCをなくした時点でセキュリティインシデントになる。
-    sudo -u ansible ssh-keygen -t ecdsa -f /home/ansible/.ssh/ansible_ecdsa -N ""
-    sudo -u ansible cat /home/ansible/.ssh/ansible_ecdsa.pub >> /home/ansible/.ssh/authorized_keys
+    su ansible -c 'ssh-keygen -t ecdsa -f /home/ansible/.ssh/ansible_ecdsa -N ""'
+    su ansible -c 'cat /home/ansible/.ssh/ansible_ecdsa.pub >> /home/ansible/.ssh/authorized_keys'
     rm /home/ansible/.ssh/ansible_ecdsa.pub
 
     # vagrantユーザーで秘密鍵をダウンロード、削除できるようにファイルを移動
