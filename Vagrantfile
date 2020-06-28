@@ -67,8 +67,13 @@ Vagrant.configure("2") do |config|
   # Ansible, Chef, Docker, Puppet and Salt are also available. Please see the
   # documentation for more information about their specific syntax and use.
   config.vm.provision "shell", inline: <<-SHELL
-    apt-get update && apt-get -y upgrade
 
+    # デフォルトのログインユーザー,vagrantの場合はvagrant,awsなどはec2-userなど
+    loginuser=vagrant
+
+    apt-get update && apt-get -y upgrade
+    # pwmakeを使うためにインストール
+    apt -y install libpwquality-tools
     # ansible からwordpressや、redmineなどの構成をインストールできるように
     # ansibleユーザーを作成しておく。
     # クライアントがansibleでsshからログインできるように
@@ -76,15 +81,25 @@ Vagrant.configure("2") do |config|
     # 秘密鍵をダウンロードしたら、vagrant(server)側の秘密鍵を削除すること。
     useradd -m ansible -s /bin/bash
 
-    # vagrant以外で行うときは必ず秘密鍵にパスコードを入れる。でないと
-    # 秘密鍵を入れているUSB,PCをなくした時点でセキュリティインシデントになる。
+    # ansibleからsudoを実行するために必要
+    usermod -aG sudo ansible
+
+    # ansibleユーザーのパスワードはansible-vault encryptで設定するので、秘密鍵のパスワードの設定はしない。
     su ansible -c 'ssh-keygen -t ecdsa -f /home/ansible/.ssh/ansible_ecdsa -N ""'
     su ansible -c 'cat /home/ansible/.ssh/ansible_ecdsa.pub >> /home/ansible/.ssh/authorized_keys'
     rm /home/ansible/.ssh/ansible_ecdsa.pub
 
-    # vagrantユーザーで秘密鍵をダウンロード、削除できるようにファイルを移動
-    mv /home/ansible/.ssh/ansible_ecdsa /home/vagrant/
-    # vagrantユーザーで秘密鍵をダウンロード、削除できるようにユーザーを変更
-    chown vagrant:vagrant /home/vagrant/ansible_ecdsa
+    # デフォルトのログインユーザーで秘密鍵をダウンロード、削除できるようにファイルを移動
+    mv /home/ansible/.ssh/ansible_ecdsa /home/$loginuser/
+    # デフォルトのログインユーザーで秘密鍵をダウンロード、削除できるように所有者を変更
+    chown $loginuser:$loginuser /home/$loginuser/ansible_ecdsa
+
+    # ansibleがplyabookでsudoが使えるように設定
+    ansible_password=$(pwmake 64)
+    echo ansible:${ansible_password} | chpasswd
+
+    echo ansible_become_pass: ${ansible_password} > /home/$loginuser/ansible_password.yml
+    # vagrantユーザーでansibleのパスワードをダウンロード、削除できるようにユーザーを変更
+    chown $loginuser:$loginuser /home/$loginuser/ansible_password.yml
   SHELL
 end

@@ -14,3 +14,14 @@
       dest: /home/ansible/tmp/
       owner: ansible
       mode: 0640
+  - name: locate command and openjava install
+    apt: 
+      name:
+        - locate
+        - whois
+      state: present
+      update_cache: yes
+      cache_valid_time: 3600
+    become: yes
+  vars_files:
+    - ansible_password.yml
