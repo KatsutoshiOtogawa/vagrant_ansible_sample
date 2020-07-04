@@ -14,8 +14,6 @@ password_file="ansible_password.yml"
 
 server_ip="192.168.33.11"
 
-server_hostname="ubuntu-focal"
-
 # アプリケーション名をここに書く
 # アプリケーション名_USER という形で仕様
 APP=APP
@@ -86,6 +84,7 @@ echo ""
 # アプリケーションサーバーの外部から参照するためのホスト名
 # これがないとALLOWED_HOSTなどを開発時と環境時でがちゃがちゃ触る必要があるので、
 # 非効率。
+server_hostname=$(ssh -F .ssh/config vagrant hostname)
 echo "added recored to /etc/hosts"
 sudo su <<END
     echo "# below record is develop server record." >> /etc/hosts
