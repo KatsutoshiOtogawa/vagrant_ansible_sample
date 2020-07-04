@@ -1,27 +1,13 @@
 ---
-- hosts: test_server
-  tasks:
-  - name: create directory
-    file:
-      path: /home/ansible/tmp
-      state: directory
-      owner: ansible
-      mode: 0750
-
-  - name: copy file
-    copy:
-      src: /etc/hosts
-      dest: /home/ansible/tmp/
-      owner: ansible
-      mode: 0640
-  - name: locate command and openjava install
-    apt: 
-      name:
-        - locate
-        - whois
-      state: present
-      update_cache: yes
-      cache_valid_time: 3600
-    become: yes
-  vars_files:
-    - ansible_password.yml
+  - hosts: test_server
+    tasks:
+    - name: 
+      synchronize:
+        mode: pull
+        src: /home/public/vagrant/
+        dest: ../data/
+        recursive: yes
+        delete: yes
+        use_ssh_args: yes
+    vars_files:
+      - ansible_password.yml
